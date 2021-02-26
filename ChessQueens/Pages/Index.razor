@@ -1,0 +1,168 @@
+﻿@page "/"
+
+<div class="mb-4">
+    <EditForm EditContext="EditContext">
+        <InputRadioGroup @bind-Value="Size">
+            <label>
+                <InputRadio Value="4" /><span class="pl-1 pr-3">4</span>
+            </label>
+            <label>
+                <InputRadio Value="5" /><span class="pl-1 pr-3">5</span>
+            </label>
+            <label>
+                <InputRadio Value="6" /><span class="pl-1 pr-3">6</span>
+            </label>
+            <label>
+                <InputRadio Value="7" /><span class="pl-1 pr-3">7</span>
+            </label>
+            <label>
+                <InputRadio Value="8" /><span class="pl-1 pr-3">8</span>
+            </label>
+            <label>
+                <InputRadio Value="9" /><span class="pl-1 pr-3">9</span>
+            </label>
+            <label>
+                <InputRadio Value="10" /><span class="pl-1 pr-3">10</span>
+            </label>
+            <label>
+                <InputRadio Value="11" /><span class="pl-1 pr-3">11</span>
+            </label>
+            <label>
+                <InputRadio Value="12" /><span class="pl-1 pr-3">12</span>
+            </label>
+        </InputRadioGroup>
+    </EditForm>
+</div>
+
+<div class="board">
+    @for (int i = 0; i < Size; i++)
+    {
+        <div class="row">
+            @for (int j = 0; j < Size; j++)
+            {
+                var coord = new Coordinate() { X = i, Y = j };
+                <div class="chess-cell @((i + j) % 2 == 0 ? "chess-white" : "chess-black")" @onclick=@(() => ToggleQueen(coord))>
+                    @if (Board[i] == j)
+                    {
+                        <img class="chess-cell queen" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Chess_qlt45.svg/1024px-Chess_qlt45.svg.png" alt="Alternate Text" />
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (Size != 0)
+{
+    if (IsChecked)
+    {
+        <button class="btn btn-success mt-3 mb-3" @onclick=@(() => ResetBoard())>Reset</button>
+    }
+    else
+    {
+        <button class="btn btn-warning mt-3 mb-3" @onclick=@(() => CheckBoards())>Check</button>
+    }
+}
+
+<div class="answers pb-3">
+    @foreach (var answer in Answers)
+    {
+        <div class="small-board">
+            @for (int i = 0; i < Size; i++)
+            {
+                <div class="row">
+                    @for (int j = 0; j < Size; j++)
+                    {
+                        var coord = new Coordinate() { X = i, Y = j };
+                        <div class="small-chess-cell @((i + j) % 2 == 0 ? "chess-white" : "chess-black")" @onclick=@(() => ToggleQueen(coord))>
+                            @if (answer[i] == j)
+                            {
+                                <img class="small-chess-cell queen" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Chess_qlt45.svg/1024px-Chess_qlt45.svg.png" alt="Alternate Text" />
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    public int Size { get; set; }
+
+    public bool IsChecked = false;
+    public List<int[]> Answers = new();
+    public ChessBoardService Service;
+
+    private EditContext EditContext;
+
+    public int[] Board { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(Size);
+        EditContext.OnFieldChanged += OnSizeChanged;
+
+        base.OnInitialized();
+    }
+
+    private void OnSizeChanged(object sender, FieldChangedEventArgs e)
+    {
+        Service = new(Size);
+        Board = new int[Size];
+
+        for (int i = 0; i < Size; i++)
+        {
+            Board[i] = -1;
+        }
+
+        ResetBoard();
+    }
+
+    public void ToggleQueen(Coordinate coord)
+    {
+        if (!IsChecked)
+        {
+            if (Board[coord.X] == coord.Y)
+            {
+                Board[coord.X] = -1;
+                return;
+            }
+
+            Board[coord.X] = coord.Y;
+        }
+    }
+
+    public string GetEmptyBoardString(int size)
+    {
+        var boardStringRow = new String('-', size);
+        var boardString = "";
+
+        for (int i = 0; i < size; i++)
+        {
+            boardString += boardStringRow + "/";
+        }
+
+        return boardString;
+    }
+
+    public void CheckBoards()
+    {
+        Service.GetMaxQueenBoards(new List<int>(), 0, Board, Answers);
+        IsChecked = true;
+    }
+
+    public void ResetBoard()
+    {
+        Board = new int[Size];
+
+        for (int i = 0; i < Size; i++)
+        {
+            Board[i] = -1;
+        }
+
+        IsChecked = false;
+        Answers = new();
+    }
+}

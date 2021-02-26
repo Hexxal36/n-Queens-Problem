@@ -1,0 +1,30 @@
+﻿.chess-cell
+ {
+    height: 50px;
+    width: 50px;
+}
+
+.chess-black {
+    background: #464646;
+}
+
+.chess-white {
+    background: #ffdcb7;
+}
+
+.queen {
+    z-index: 1000;
+}
+
+.small-chess-cell {
+    height: 25px;
+    width: 25px;
+}
+
+.answers {
+    display: flex;
+    gap: 3em;
+    flex-wrap: wrap;
+    width: 75vw;
+    justify-content: center;
+}
